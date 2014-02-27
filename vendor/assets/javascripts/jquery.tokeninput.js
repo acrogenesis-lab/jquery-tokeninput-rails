@@ -18,6 +18,7 @@ var DEFAULT_SETTINGS = {
     minChars: 1,
     propertyToSearch: "name",
     jsonContainer: null,
+    jsonContainer2: null,
     contentType: "json",
 
     // Prepopulation settings
@@ -39,7 +40,8 @@ var DEFAULT_SETTINGS = {
 
     resultsFormatter: function(item) {
       var string = item[this.propertyToSearch];
-      return "<li>" + (this.enableHTML ? string : _escapeHTML(string)) + "</li>";
+      var organization_name = item["organization"]["title"];
+      return "<li>" + (this.enableHTML ? (string + " De:<i>" + organization_name + "</i>") : (_escapeHTML(string) + "<i class='organization-token'>" + _escapeHTML(organization_name) + "</i>")) + "</li>";
     },
 
     tokenFormatter: function(item) {
@@ -456,18 +458,19 @@ $.TokenList = function (input, url_or_data, settings) {
 
     // Pre-populate list if items exist
     hidden_input.val("");
-    var li_data = $(input).data("settings").prePopulate || hidden_input.data("pre");
-    if($(input).data("settings").processPrePopulate && $.isFunction($(input).data("settings").onResult)) {
-        li_data = $(input).data("settings").onResult.call(hidden_input, li_data);
+    if($(input).data("settings").prePopulate.valueOf(0) != "" ){
+      var li_data = $(input).data("settings").prePopulate || hidden_input.data("pre");
+      if($(input).data("settings").processPrePopulate && $.isFunction($(input).data("settings").onResult)) {
+          li_data = $(input).data("settings").onResult.call(hidden_input, li_data);
+      }
+      if(li_data && li_data.length) {
+          $.each(li_data, function (index, value) {
+              insert_token(value);
+              checkTokenLimit();
+              input_box.attr("placeholder", null)
+          });
+      }
     }
-    if(li_data && li_data.length) {
-        $.each(li_data, function (index, value) {
-            insert_token(value);
-            checkTokenLimit();
-            input_box.attr("placeholder", null)
-        });
-    }
-
     // Check if widget should initialize as disabled
     if ($(input).data("settings").disabled) {
         toggleDisabled(true);
@@ -974,14 +977,14 @@ $.TokenList = function (input, url_or_data, settings) {
 
                 // Attach the success callback
                 ajax_params.success = function(results) {
-                  cache.add(cache_key, $(input).data("settings").jsonContainer ? results[$(input).data("settings").jsonContainer] : results);
+                  cache.add(cache_key, $(input).data("settings").jsonContainer2 ? results[$(input).data("settings").jsonContainer][$(input).data("settings").jsonContainer2] : results);
                   if($.isFunction($(input).data("settings").onResult)) {
                       results = $(input).data("settings").onResult.call(hidden_input, results);
                   }
 
                   // only populate the dropdown if the results are associated with the active search query
                   if(input_box.val() === query) {
-                      populate_dropdown(query, $(input).data("settings").jsonContainer ? results[$(input).data("settings").jsonContainer] : results);
+                      populate_dropdown(query, $(input).data("settings").jsonContainer2 ? results[$(input).data("settings").jsonContainer][$(input).data("settings").jsonContainer2] : results);
                   }
                 };
 
