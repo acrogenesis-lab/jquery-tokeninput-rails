@@ -40,7 +40,12 @@ var DEFAULT_SETTINGS = {
 
     resultsFormatter: function(item) {
       var string = item[this.propertyToSearch];
-      var organization_name = item["organization"]["title"];
+      var organization_name = '';
+      if (item["organization"] == null) {
+        organization_name = 'Sin organización'
+      }else{
+        organization_name = item["organization"]["title"];
+      }
       return "<li>" + (this.enableHTML ? (string + " De:<i>" + organization_name + "</i>") : (_escapeHTML(string) + "<i class='organization-token'>" + _escapeHTML(organization_name) + "</i>")) + "</li>";
     },
 
