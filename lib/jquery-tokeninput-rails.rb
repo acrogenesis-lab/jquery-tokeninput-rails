@@ -1,4 +1,4 @@
-require "jquery-tokeninput-rails/version"
+require 'jquery-tokeninput-rails/version'
 
 module Jquery
   module Tokeninput
